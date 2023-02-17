@@ -25,14 +25,23 @@ const Dashboard = () => {
 
 
   return <Center bg="#C4C4C4" minH="100vh">
-    <Box minWidth="515px" p="40px" bg="#FFFFFF">
+    <Box minWidth="515px" p="30px" bg="#FFFFFF">
+      <Text mb="40px" textAlign="center" color="blue.500" fontWeight="bold" fontSize="1.8rem">Customer Relationship Management – Lead Management</Text>
       <VStack>
-        <Button width="100%" type="submit" mb="52px">
-          <Link to={NAVIGATION_ROUTES.ADDLEAD}> Add Lead</Link>
+        <Link to={NAVIGATION_ROUTES.ADDLEAD}>
+          <Button width="100%" mb="20px" bg="teal.500" rounded="md"
+            fontWeight="semibold" textColor="white"  _hover={{ bg: "teal.600" }}
+            _focus={{ boxShadow: "outline" }}>
+           Add Lead
         </Button>
-        <Button width="100%" type="submit" mb="52px">
-          <Link to={NAVIGATION_ROUTES.VIEWLEAD}> View Lead</Link>
+        </Link>
+        <Link to={NAVIGATION_ROUTES.VIEWLEAD}>
+          <Button width="100%" mb="20px" bg="orange.500" rounded="md"
+            fontWeight="semibold" textColor="white" _hover={{ bg: "orange.600" }}
+            _focus={{ boxShadow: "outline" }}>
+           View Lead
         </Button>
+        </Link>
       </VStack>
     </Box>
   </Center>

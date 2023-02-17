@@ -15,126 +15,148 @@ import {
   Th,
   Td,
   TableCaption,
-  TableContainer
+  TableContainer,
+  
 } from "@chakra-ui/react";
+import toast from 'react-hot-toast';
 import { Link } from "react-router-dom";
 import { useEffect ,useState} from "react";
 import { viewLead } from "services/common.service";
 import { IconButton } from '@chakra-ui/react'
 import { SearchIcon } from "@chakra-ui/icons";
+import SimpleModal from "../../components/Modal"
+import ExampleTable from "components/Table";
+import { updateLeadData, closeLeadData } from "services/common.service";
+import { useForm } from "react-hook-form";
+
+
+
+
+
+
 
 const ViewLead = () => {
+
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
 
   const [data,setData]=useState([])
   const [email,setEmail]=useState("")
   const [phoneNumber,setPhoneNumber]=useState("")
   const [name,setName]=useState("")
+  const [leadId,setLeadId] = useState(null)
 
    useEffect(()=>{
      setLeadData()
    },[])
 
+
+  const noPreview= () => {
+    const notify = () => toast.error("Note is unavailable");
+    notify();
+
+  }
   const setLeadData= async() => {
 
        const res =await viewLead()
-    console.log("useEffect",res);
     if(res.status){
 
       setData(res?.response?.data?.datalist)
     } 
   }
 
-console.log(data,"DDDD")
+  // write the save api here for saving the row and reload data later
+  const handleEdit = async (row) => {
+
+    // const res=await updateLeadData()
+    setData((prevData) =>
+      prevData.map((item) => (item.leadId === row.leadId ? row : item))
+    );
+    // setLeadData()
+  };
+
+  //write the delete api here for deleting the row and reload data for table here
+  const handleDelete = (row) => {
+    setData((prevData) =>
+      prevData.filter((item) => item.leadId !== row.leadId)
+    );
+  };
+
+  
+
+  const closeLeadHandler = async(leadId) =>{
+    const res = await closeLeadData(leadId)
+    setLeadData()
+
+
+  }
+
+
+  // Function called onForm submit
+  const onSubmit = async (data) => {
+    console.log("form submitted in view", data);
+
+  };
 
 
   return (
     <Center bg="#C4C4C4" minHeight="100vh">
       <Box minWidth="515px" padding="40px" bg="#FFFFFF">
         <HStack>
-          <Input
-            minH="56px"
-            disabled={false}
-            placeholder="Search by Name"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value)
-            }}
-          />
-          <SearchIcon colorScheme='blue' />
-        </HStack>
-        <TableContainer>
-          <Table variant='simple'>
-            <TableCaption>List of all the leads</TableCaption>
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>Email</Th>
-                <Th isNumeric>Phone Number</Th>
-                <Th>Actions</Th>
-                <Th>Close Record</Th>
-                <Th>Status</Th>
-                <Th>Account Status</Th>
-                <Th>Notes</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
+          {/* handleSubmit will validate your inputs before invoking "onSubmit" */}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Box pb="30px" position="relative">
+              <Input
+                minH="56px"
+                disabled={false}
+                placeholder="Name"
+                {...register("firstName")}
+              />
+            </Box>
 
-              {data?.map((el,rowIndex) =><Tr key={rowIndex}>
-                <Td>{el.firstName + " " + el.middleName + " " +  el.lastName}</Td>
-                <Td>
 
-                  <Input
-            minH="56px"
-            disabled={false}
-            placeholder="Email address"
-            value={email || el.email}
-            onChange={(e) => {
-              setEmail(e.target.value)
-            }}
-            />
+            <Box pb="30px" position="relative">
+              <Input
+                minH="56px"
+                disabled={false}
+                placeholder="email"
+                {...register("email")}
+              />
+             
+            </Box>
 
+            <Box pb="30px" position="relative">
+              <Input
+                minH="56px"
+                disabled={false}
+                placeholder="phone number"
+                {...register("phoneNumber")}
+              />
             
-                            </Td>
-           
+            </Box>
+            <Button type="submit">Search</Button>
+          {/* <SearchIcon colorScheme='blue' /> */}
+            </form>
+        </HStack>
 
-                  {/* {data?.map((row, rowIndex) => {
-                    <Tr key={rowIndex}>
-                      {row.map((cell, colIndex) =>{
-                        <Input
-                          minH="56px"
-                          disabled={false}
-                          placeholder="Email address"
-                          value={email || el.email}
-                          onChange={(e) => {
-                            setEmail(e.target.value)
-                          }}
-                        />
-                      })}
-
-                    </Tr>
-                  })} */}
-                <Td>{el.phoneNumber}</Td>
-                <Td>
-                <HStack>
-                <Button>Edit</Button>
-                <Button>Update</Button>
-                </HStack>
-                </Td>
-                <Td>
-                  {el.isActive ? <Button>Close</Button> : <Button>Closed</Button>}
-                </Td>
-
-                <Td>{el.leadStatus}</Td>
-                <Td>{el.isActive ? "Active" : "InActive"}</Td>
-                <Td><Button>View</Button></Td>
-              </Tr>)}
-
-              
-              
-            </Tbody>
+        <ExampleTable
+          data={data}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          setLeadId={setLeadId}
+          closeLeadHandler={closeLeadHandler}
+          noPreview={noPreview}
+        />
+        {
           
-          </Table>
-        </TableContainer>
+          !!leadId && <SimpleModal leadId={leadId} setLeadId={setLeadId} />
+        }
+      
       </Box>
     </Center>
   );
